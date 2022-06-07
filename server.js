@@ -1,10 +1,11 @@
 // Import Dependencies
-import bodyParser from "body-parser";
 import express from "express";
+import bodyParser from "body-parser";
+import mongoose from "mongoose";
 import cors from "cors";
-
-
+import 'dotenv/config'
 import postRoutes from './routes/posts.js'
+import morgan from "morgan";
 
 
 
@@ -17,6 +18,8 @@ app.use('/posts', postRoutes)
 app.use(bodyParser.json({ limit: "30mb", extended: true}));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true}));
 app.use(cors());
+app.use(morgan('dev'));
+
 
 //home route for testing our app
 app.get("/", (req, res) => {
@@ -25,7 +28,16 @@ app.get("/", (req, res) => {
 
 
 //declare a variable for our port number
-const PORT = process.env.PORT || 4000;
+const { PORT = 4000, MONGODB_URL } = process.env;
+
+mongoose.connect(MONGODB_URL);
+// Connection Events
+mongoose.connection
+  .on("open", () => console.log("Your are connected to mongoose"))
+  .on("close", () => console.log("Your are disconnected from mongoose"))
+  .on("error", (error) => console.log(error));
+
+
 
 // turn on the server listener
 app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
